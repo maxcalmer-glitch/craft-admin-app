@@ -40,9 +40,9 @@ export async function POST(request: NextRequest) {
         if (!chatId || chatId === 'SYSTEM') { failed++; continue }
         let result
         if (photo_url) {
-          result = await sendTelegramPhoto(chatId, photo_url, message)
+          result = await sendTelegramPhoto(chatId, photo_url, message, 'HTML')
         } else {
-          result = await sendTelegramMessage(chatId, message)
+          result = await sendTelegramMessage(chatId, message, 'HTML')
         }
         if (result.ok) { sent++ } else { 
           console.error(`Broadcast failed for ${chatId}:`, result.description)
