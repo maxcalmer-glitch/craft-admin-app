@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
 import { getDb } from '@/lib/supabase'
-import { sendTelegramMessage } from '@/lib/telegram'
+import { sendTelegramMessage, sendTelegramVideo } from '@/lib/telegram'
 import { logAuditAction } from '@/lib/audit'
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
@@ -9,7 +9,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   if (!auth.authorized) return auth.error!
 
   try {
-    const { action, reason } = await request.json()
+    const { action, reason, video_url } = await request.json()
     const db = getDb()
     
     const { data: user } = await db.from('users').select('telegram_id, first_name').eq('id', params.id).single()
@@ -20,8 +20,17 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       
       await db.from('users').update({ is_blocked: true, block_reason: reason }).eq('id', params.id)
       
-      // Notify user
+      // Notify user with text
       await sendTelegramMessage(user.telegram_id, `🚫 <b>Ваш аккаунт заблокирован</b>\n\nПричина: ${reason}\n\nОбратитесь к администратору для разблокировки.`)
+      
+      // Send video if URL provided
+      if (video_url?.trim()) {
+        try {
+          await sendTelegramVideo(user.telegram_id, video_url.trim(), `🚫 Блокировка: ${reason}`)
+        } catch (e) {
+          console.error('Failed to send block video:', e)
+        }
+      }
       
       await logAuditAction(auth.username!, 'BLOCK_USER', `Блокировка ${user.first_name} (${user.telegram_id}). Причина: ${reason}`, params.id)
     } else {

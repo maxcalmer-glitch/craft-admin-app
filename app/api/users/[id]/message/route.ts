@@ -18,6 +18,20 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
     const result = await sendTelegramMessage(user.telegram_id, text)
     
+    // Save to admin_messages for chat history
+    if (result.ok) {
+      try {
+        await db.from('admin_messages').insert({
+          user_telegram_id: user.telegram_id,
+          direction: 'admin_to_user',
+          message: text,
+          admin_username: auth.username || 'admin'
+        })
+      } catch (e) {
+        console.error('Failed to save admin message:', e)
+      }
+    }
+    
     await logAuditAction(auth.username!, 'SEND_MESSAGE', `Сообщение пользователю ${user.first_name} (${user.telegram_id})`, params.id)
 
     return NextResponse.json({ success: result.ok, error: result.ok ? undefined : result.description })

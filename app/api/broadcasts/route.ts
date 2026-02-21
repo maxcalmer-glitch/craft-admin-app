@@ -36,17 +36,22 @@ export async function POST(request: NextRequest) {
     // Send to all users with delay to avoid rate limits
     for (const user of users) {
       try {
+        const chatId = user.telegram_id?.toString()
+        if (!chatId || chatId === 'SYSTEM') { failed++; continue }
         let result
         if (photo_url) {
-          result = await sendTelegramPhoto(user.telegram_id, photo_url, message)
+          result = await sendTelegramPhoto(chatId, photo_url, message)
         } else {
-          result = await sendTelegramMessage(user.telegram_id, message)
+          result = await sendTelegramMessage(chatId, message)
         }
-        if (result.ok) sent++; else failed++
-      } catch { failed++ }
+        if (result.ok) { sent++ } else { 
+          console.error(`Broadcast failed for ${chatId}:`, result.description)
+          failed++ 
+        }
+      } catch (e) { console.error(`Broadcast error for user:`, e); failed++ }
       
-      // Small delay to avoid Telegram rate limits
-      await new Promise(r => setTimeout(r, 50))
+      // Delay to avoid Telegram rate limits (max 30/sec)
+      await new Promise(r => setTimeout(r, 100))
     }
 
     // Save to history

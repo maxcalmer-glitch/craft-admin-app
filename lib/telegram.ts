@@ -18,3 +18,12 @@ export async function sendTelegramPhoto(chatId: string, photoUrl: string, captio
   })
   return res.json()
 }
+
+export async function sendTelegramVideo(chatId: string, videoUrl: string, caption?: string): Promise<{ ok: boolean; description?: string }> {
+  const res = await fetch(`${API_BASE}/sendVideo`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: chatId, video: videoUrl, caption, parse_mode: 'HTML' })
+  })
+  return res.json()
+}
