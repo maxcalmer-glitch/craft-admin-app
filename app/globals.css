@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #1A0E0A;
+  color: #F5E6D3;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0F0805;
+}
+::-webkit-scrollbar-thumb {
+  background: #3D2A1F;
+  border-radius: 3px;
+}
+
+input, textarea, select {
+  background-color: #0F0805 !important;
+  border-color: #3D2A1F !important;
+  color: #F5E6D3 !important;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: #D4871C !important;
+  ring-color: #D4871C !important;
+}
