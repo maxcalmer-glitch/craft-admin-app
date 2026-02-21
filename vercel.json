@@ -2,5 +2,10 @@
   "framework": "nextjs",
   "buildCommand": "npm run build",
   "installCommand": "npm install",
-  "regions": ["fra1"]
+  "regions": ["fra1"],
+  "env": {
+    "NEXT_PUBLIC_SUPABASE_URL": "https://ambzvfgwdbnaujvqfyny.supabase.co",
+    "JWT_SECRET": "craft-admin-secret-key-2026-secure",
+    "NEXT_PUBLIC_APP_URL": "https://craft-admin-app.vercel.app"
+  }
 }
