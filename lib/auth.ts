@@ -1,18 +1,20 @@
 import { sign, verify } from 'jsonwebtoken'
-import { hashSync, compareSync } from 'bcryptjs'
+import { compareSync } from 'bcryptjs'
 import { NextRequest, NextResponse } from 'next/server'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'craft-admin-v3-enterprise-secret-2026-xK9mP2nQ'
+const JWT_SECRET = process.env.JWT_SECRET
+if (!JWT_SECRET) throw new Error('JWT_SECRET environment variable is required')
+
 const TOKEN_EXPIRY = '24h'
 
-// Hardcoded admin credentials (hashed)
+// Pre-computed bcrypt hashes (passwords NOT stored in plaintext)
 const ADMIN_USERS: Record<string, { passwordHash: string; role: string }> = {
   admin: {
-    passwordHash: hashSync('craft2026!', 10),
+    passwordHash: '$2a$10$kTvgnmogOC8zhCv5yz22YOiUx/9hHeunfbRbWmA/hMHumJey5NXx6',
     role: 'superadmin'
   },
   maksym: {
-    passwordHash: hashSync('max2026!CRAFT', 10),
+    passwordHash: '$2a$10$5EGRSOoSx9mdZAQYsBxMBOmbxWdBip85lbsAqZSR/xYpCU7Lrr8DG',
     role: 'admin'
   }
 }
