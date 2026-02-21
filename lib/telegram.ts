@@ -1,4 +1,4 @@
-const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '7977206369:AAEPOmqrXxQ8aZkuSi9_AcYNNei520u_j4A'
+const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || ''
 const API_BASE = `https://api.telegram.org/bot${BOT_TOKEN}`
 
 export async function sendTelegramMessage(chatId: string, text: string, parseMode: string = 'HTML'): Promise<{ ok: boolean; description?: string }> {
