@@ -23,13 +23,12 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       // Notify user with text
       await sendTelegramMessage(user.telegram_id, `🚫 <b>Ваш аккаунт заблокирован</b>\n\nПричина: ${reason}\n\nОбратитесь к администратору для разблокировки.`)
       
-      // Send video if URL provided
-      if (video_url?.trim()) {
-        try {
-          await sendTelegramVideo(user.telegram_id, video_url.trim(), `🚫 Блокировка: ${reason}`)
-        } catch (e) {
-          console.error('Failed to send block video:', e)
-        }
+      // Always send block video (file_id stored in Telegram servers)
+      const BLOCK_VIDEO_FILE_ID = 'BAACAgIAAxkBAAOPaZmixiXAHFgMJLNMtbTQX58vziAAAoeGAAL0dMlI27YW0zTjlMg6BA'
+      try {
+        await sendTelegramVideo(user.telegram_id, video_url?.trim() || BLOCK_VIDEO_FILE_ID, `🚫 Блокировка: ${reason}`)
+      } catch (e) {
+        console.error('Failed to send block video:', e)
       }
       
       await logAuditAction(auth.username!, 'BLOCK_USER', `Блокировка ${user.first_name} (${user.telegram_id}). Причина: ${reason}`, params.id)
