@@ -2,7 +2,7 @@ import { sign, verify } from 'jsonwebtoken'
 import { compareSync } from 'bcryptjs'
 import { NextRequest, NextResponse } from 'next/server'
 
-const JWT_SECRET = process.env.JWT_SECRET
+const JWT_SECRET: string = process.env.JWT_SECRET || ''
 if (!JWT_SECRET) throw new Error('JWT_SECRET environment variable is required')
 
 const TOKEN_EXPIRY = '24h'
