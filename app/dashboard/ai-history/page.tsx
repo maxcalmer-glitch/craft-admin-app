@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import Header from '@/components/Header'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://craft-main-app.vercel.app'
@@ -29,6 +29,7 @@ export default function AIHistoryPage() {
   const [selectedUser, setSelectedUser] = useState<UserSummary | null>(null)
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [loadingMessages, setLoadingMessages] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetch(`${API_URL}/api/admin/ai-history?secret=${SECRET}`)
@@ -56,7 +57,10 @@ export default function AIHistoryPage() {
     setLoadingMessages(true)
     fetch(`${API_URL}/api/admin/ai-history/${user.user_id}?secret=${SECRET}`)
       .then(r => r.json())
-      .then(data => setMessages(Array.isArray(data) ? data : data.messages || []))
+      .then(data => {
+        setMessages(Array.isArray(data) ? data : data.messages || [])
+        setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
+      })
       .catch(console.error)
       .finally(() => setLoadingMessages(false))
   }
@@ -93,6 +97,9 @@ export default function AIHistoryPage() {
                     <div className="text-craft-light text-sm font-medium">{user.first_name || user.username || `User ${user.user_id}`}</div>
                     <div className="text-craft-muted text-xs">@{user.username || '—'} · ID: {user.user_id}</div>
                     <div className="text-craft-muted text-xs mt-1">💬 {user.message_count} сообщений</div>
+                    {user.last_message_at && (
+                      <div className="text-craft-muted text-xs">🕐 {new Date(user.last_message_at).toLocaleString('ru')}</div>
+                    )}
                   </button>
                 ))
               )}
@@ -116,18 +123,21 @@ export default function AIHistoryPage() {
                     <div className="text-craft-muted text-sm">Нет сообщений</div>
                   ) : (
                     messages.map((msg, i) => (
-                      <div key={msg.id || i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[75%] rounded-lg p-3 text-sm ${
+                      <div key={msg.id || i} className={`flex ${msg.role === 'user' ? 'justify-start' : 'justify-end'}`}>
+                        <div className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm ${
                           msg.role === 'user' 
-                            ? 'bg-craft-amber/20 text-craft-light border border-craft-amber/30' 
-                            : 'bg-craft-dark text-craft-light border border-craft-border'
+                            ? 'bg-craft-dark text-craft-light border border-craft-border rounded-bl-sm' 
+                            : 'bg-craft-amber/20 text-craft-light border border-craft-amber/30 rounded-br-sm'
                         }`}>
-                          <div className="text-xs text-craft-muted mb-1">{msg.role === 'user' ? '👤 Юзер' : '🤖 Михалыч'} · {new Date(msg.created_at).toLocaleString('ru')}</div>
                           <div className="whitespace-pre-wrap">{msg.content}</div>
+                          <div className="text-[10px] text-craft-muted mt-1.5 text-right">
+                            {msg.role === 'user' ? '👤' : '🤖'} {new Date(msg.created_at).toLocaleString('ru')}
+                          </div>
                         </div>
                       </div>
                     ))
                   )}
+                  <div ref={messagesEndRef} />
                 </div>
               </>
             )}

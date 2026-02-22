@@ -59,7 +59,6 @@ export default function UserChatPage() {
     setSelectedUser(user)
     setLoadingMsgs(true)
     fetchMessages(user.user_id)
-    // Auto-refresh every 10s
     if (intervalRef.current) clearInterval(intervalRef.current)
     intervalRef.current = setInterval(() => fetchMessages(user.user_id), 10000)
   }
@@ -117,6 +116,9 @@ export default function UserChatPage() {
                       {user.unread_count ? <span className="bg-craft-amber text-craft-dark text-xs px-1.5 py-0.5 rounded-full font-bold">{user.unread_count}</span> : null}
                     </div>
                     <div className="text-craft-muted text-xs">@{user.username || '—'} · ID: {user.user_id}</div>
+                    {user.last_message_at && (
+                      <div className="text-craft-muted text-xs mt-1">🕐 {new Date(user.last_message_at).toLocaleString('ru')}</div>
+                    )}
                   </button>
                 ))
               )}
@@ -141,13 +143,15 @@ export default function UserChatPage() {
                   ) : (
                     messages.map((msg, i) => (
                       <div key={msg.id || i} className={`flex ${msg.direction === 'in' ? 'justify-start' : 'justify-end'}`}>
-                        <div className={`max-w-[75%] rounded-lg p-3 text-sm ${
+                        <div className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm ${
                           msg.direction === 'in'
-                            ? 'bg-craft-dark text-craft-light border border-craft-border'
-                            : 'bg-craft-amber/20 text-craft-light border border-craft-amber/30'
+                            ? 'bg-craft-dark text-craft-light border border-craft-border rounded-bl-sm'
+                            : 'bg-craft-amber/20 text-craft-light border border-craft-amber/30 rounded-br-sm'
                         }`}>
-                          <div className="text-xs text-craft-muted mb-1">{msg.direction === 'in' ? '👤 Юзер' : '🤖 Бот'} · {new Date(msg.created_at).toLocaleString('ru')}</div>
                           <div className="whitespace-pre-wrap">{msg.text}</div>
+                          <div className="text-[10px] text-craft-muted mt-1.5 text-right">
+                            {msg.direction === 'in' ? '👤' : '🤖'} {new Date(msg.created_at).toLocaleString('ru')}
+                          </div>
                         </div>
                       </div>
                     ))
