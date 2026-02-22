@@ -128,13 +128,16 @@ export default function UserDetailPage() {
   useEffect(() => { fetchUser(); fetchMessages() }, [id])
 
   useEffect(() => {
-    const interval = setInterval(fetchMessages, 10000)
+    const interval = setInterval(() => {
+      fetchMessages()
+      if (activeTab === 'bot-chat' && user?.telegram_id) fetchBotMessages()
+    }, 10000)
     return () => clearInterval(interval)
-  }, [id])
+  }, [id, activeTab, user?.telegram_id])
 
   useEffect(() => {
-    if (activeTab === 'ai-chat' && user?.telegram_id && aiMessages.length === 0) fetchAiHistory()
-    if (activeTab === 'bot-chat' && user?.telegram_id && botMessages.length === 0) fetchBotMessages()
+    if (activeTab === 'ai-chat' && user?.telegram_id) fetchAiHistory()
+    if (activeTab === 'bot-chat' && user?.telegram_id) fetchBotMessages()
   }, [activeTab, user?.telegram_id])
 
   const sendMessage = async () => {
