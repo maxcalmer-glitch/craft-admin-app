@@ -10,6 +10,9 @@ const NAV_ITEMS = [
   { href: '/dashboard/broadcasts', icon: '📢', label: 'Рассылки' },
   { href: '/dashboard/achievements', icon: '🏆', label: 'Достижения' },
   { href: '/dashboard/ai-knowledge', icon: '🤖', label: 'База знаний ИИ' },
+  { href: '/dashboard/shop', icon: '🛒', label: 'Магазин' },
+  { href: '/dashboard/ai-history', icon: '🧠', label: 'AI История' },
+  { href: '/dashboard/user-chat', icon: '💬', label: 'Чат с юзерами' },
   { href: '/dashboard/settings', icon: '⚙️', label: 'Настройки' },
 ]
 
