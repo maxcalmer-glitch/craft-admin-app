@@ -1,9 +1,8 @@
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || ''
 const API_BASE = `https://api.telegram.org/bot${BOT_TOKEN}`
 
-export async function sendTelegramMessage(chatId: string, text: string, parseMode?: string): Promise<{ ok: boolean; description?: string }> {
-  const body: any = { chat_id: chatId, text }
-  if (parseMode) body.parse_mode = parseMode
+export async function sendTelegramMessage(chatId: string, text: string, parseMode: string = 'HTML'): Promise<{ ok: boolean; description?: string }> {
+  const body: any = { chat_id: chatId, text, parse_mode: parseMode }
   
   const res = await fetch(`${API_BASE}/sendMessage`, {
     method: 'POST',
