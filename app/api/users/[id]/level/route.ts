@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
-import { getDb } from '@/lib/supabase'
-import { sendTelegramMessage } from '@/lib/telegram'
 import { logAuditAction } from '@/lib/audit'
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://craft-main-app.vercel.app'
+const ADMIN_SECRET = 'craft-webhook-secret-2026'
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   const auth = requireAuth(request)
@@ -14,20 +15,16 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       return NextResponse.json({ error: 'Invalid level' }, { status: 400 })
     }
 
-    const db = getDb()
-    const { data: user } = await db.from('users').select('telegram_id, first_name').eq('id', params.id).single()
-    if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    // Use backend endpoint — handles DB update, TG notification, and achievement check
+    const res = await fetch(`${API_URL}/api/admin/user/${params.id}/level?secret=${ADMIN_SECRET}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ level })
+    })
+    const result = await res.json()
+    if (!result.success) return NextResponse.json({ error: result.error || 'Failed' }, { status: 400 })
 
-    await db.from('users').update({ user_level: level }).eq('id', params.id)
-
-    // Notify user
-    if (level === 'vip') {
-      await sendTelegramMessage(user.telegram_id, `👑 <b>Поздравляем! Вы получили VIP статус!</b>\n\n🎁 Бонусы VIP:\n• Безлимитный доступ к ИИ (без списания крышек)\n• Приоритетная поддержка\n\n🍺 Наслаждайтесь привилегиями!`)
-    } else {
-      await sendTelegramMessage(user.telegram_id, `ℹ️ Ваш статус изменён на <b>Basic</b>.`)
-    }
-
-    await logAuditAction(auth.username!, 'CHANGE_LEVEL', `${user.first_name} (${user.telegram_id}) → ${level.toUpperCase()}`, params.id)
+    await logAuditAction(auth.username!, 'CHANGE_LEVEL', `User ${params.id} → ${level.toUpperCase()}`, params.id)
 
     return NextResponse.json({ success: true })
   } catch (error) {
