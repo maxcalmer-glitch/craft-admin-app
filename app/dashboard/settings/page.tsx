@@ -9,6 +9,10 @@ export default function SettingsPage() {
   const [blockVideoUrl, setBlockVideoUrl] = useState('')
   const [savingVideo, setSavingVideo] = useState(false)
   const [videoSaved, setVideoSaved] = useState(false)
+  const [newsDailyCost, setNewsDailyCost] = useState('')
+  const [aiMessageCost, setAiMessageCost] = useState('')
+  const [savingCosts, setSavingCosts] = useState(false)
+  const [costsSaved, setCostsSaved] = useState(false)
 
   const token = typeof window !== 'undefined' ? localStorage.getItem('craft_admin_token') : ''
 
@@ -22,6 +26,8 @@ export default function SettingsPage() {
       .then(r => r.json())
       .then(d => {
         if (d.settings?.block_video_url) setBlockVideoUrl(d.settings.block_video_url)
+        if (d.settings?.news_daily_cost) setNewsDailyCost(d.settings.news_daily_cost)
+        if (d.settings?.ai_message_cost) setAiMessageCost(d.settings.ai_message_cost)
       })
       .catch(() => {})
   }, [])
@@ -38,6 +44,26 @@ export default function SettingsPage() {
       if ((await res.json()).success) setVideoSaved(true)
     } catch {}
     setSavingVideo(false)
+  }
+
+  const saveCosts = async () => {
+    setSavingCosts(true)
+    setCostsSaved(false)
+    try {
+      const saves = [
+        { key: 'news_daily_cost', value: newsDailyCost },
+        { key: 'ai_message_cost', value: aiMessageCost },
+      ]
+      for (const s of saves) {
+        await fetch('/api/settings', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify(s)
+        })
+      }
+      setCostsSaved(true)
+    } catch {}
+    setSavingCosts(false)
   }
 
   return (
@@ -64,6 +90,39 @@ export default function SettingsPage() {
               <div className="flex justify-between"><span className="text-craft-muted">CSP Headers:</span><span className="text-green-400">✅ Configured</span></div>
               <div className="flex justify-between"><span className="text-craft-muted">Audit Logging:</span><span className="text-green-400">✅ Enabled</span></div>
             </div>
+          </div>
+        </div>
+
+        <div className="bg-craft-card border border-craft-border rounded-xl p-6 mb-8">
+          <h3 className="text-lg font-bold text-craft-gold mb-4">🪙 Стоимость услуг</h3>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm text-craft-muted mb-1">Стоимость подписки на новости (крышек/день)</label>
+              <input
+                type="number"
+                value={newsDailyCost}
+                onChange={e => { setNewsDailyCost(e.target.value); setCostsSaved(false) }}
+                placeholder="10"
+                className="w-full bg-craft-dark border border-craft-border rounded-lg px-4 py-2 text-sm text-craft-light focus:border-craft-gold outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-craft-muted mb-1">Стоимость сообщения ИИ (крышек)</label>
+              <input
+                type="number"
+                value={aiMessageCost}
+                onChange={e => { setAiMessageCost(e.target.value); setCostsSaved(false) }}
+                placeholder="5"
+                className="w-full bg-craft-dark border border-craft-border rounded-lg px-4 py-2 text-sm text-craft-light focus:border-craft-gold outline-none"
+              />
+            </div>
+            <button
+              onClick={saveCosts}
+              disabled={savingCosts}
+              className="px-4 py-2 bg-craft-gold text-craft-dark font-bold rounded-lg hover:bg-craft-amber transition disabled:opacity-50"
+            >
+              {savingCosts ? '...' : costsSaved ? '✅ Сохранено' : '💾 Сохранить'}
+            </button>
           </div>
         </div>
 

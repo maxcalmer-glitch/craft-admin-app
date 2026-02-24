@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { href: '/dashboard/achievements', icon: '🏆', label: 'Достижения' },
   { href: '/dashboard/ai-knowledge', icon: '🤖', label: 'База знаний ИИ' },
   { href: '/dashboard/shop', icon: '🛒', label: 'Магазин' },
+  { href: '/dashboard/news', icon: '📰', label: 'Новости' },
   { href: '/dashboard/settings', icon: '⚙️', label: 'Настройки' },
 ]
 
