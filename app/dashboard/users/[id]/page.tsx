@@ -239,7 +239,7 @@ export default function UserDetailPage() {
     { key: 'info', label: '📋 Информация' },
     { key: 'ai-chat', label: '🧠 AI чат' },
     { key: 'bot-chat', label: '💬 Сообщения боту' },
-    { key: 'referrals', label: `🔗 Рефералы (${user.referrals?.length || 0})` },
+    { key: 'referrals', label: `🔗 Рефералы (L1: ${user.referrals?.length || 0} / L2: ${user.referrals_l2?.length || 0})` },
     { key: 'balance', label: '💰 Баланс' },
   ]
 
@@ -468,22 +468,44 @@ export default function UserDetailPage() {
 
         {/* Tab: Referrals */}
         {activeTab === 'referrals' && (
-          <div className="bg-craft-card border border-craft-border rounded-xl p-6">
-            <h3 className="text-lg font-bold text-craft-gold mb-4">🔗 Рефералы</h3>
-            {!user.referrals || user.referrals.length === 0 ? (
-              <div className="text-craft-muted text-sm text-center py-8">Нет рефералов</div>
-            ) : (
-              <div className="space-y-2">
-                {user.referrals.map(ref => (
-                  <div key={ref.id} className="flex items-center justify-between py-3 px-4 border-b border-craft-border/30 hover:bg-craft-dark/30 rounded-lg transition">
-                    <button onClick={() => router.push(`/dashboard/users/${ref.id}`)} className="text-craft-amber hover:underline text-sm">
-                      {ref.first_name} (@{ref.username || '—'})
-                    </button>
-                    <span className="text-xs text-craft-muted">{new Date(ref.created_at).toLocaleDateString('ru')}</span>
-                  </div>
-                ))}
-              </div>
-            )}
+          <div className="space-y-4">
+            <div className="bg-craft-card border border-craft-border rounded-xl p-6">
+              <h3 className="text-lg font-bold text-craft-gold mb-4">👥 Рефералы 1-го уровня ({user.referrals?.length || 0})</h3>
+              {!user.referrals || user.referrals.length === 0 ? (
+                <div className="text-craft-muted text-sm text-center py-4">Нет рефералов</div>
+              ) : (
+                <div className="space-y-1">
+                  {user.referrals.map((ref: any) => (
+                    <div key={ref.id} className="flex items-center justify-between py-3 px-4 border-b border-craft-border/30 hover:bg-craft-dark/30 rounded-lg transition">
+                      <button onClick={() => router.push(`/dashboard/users/${ref.id}`)} className="text-craft-amber hover:underline text-sm">
+                        {ref.first_name} (@{ref.username || '—'})
+                      </button>
+                      <span className="text-xs text-craft-muted">{new Date(ref.created_at).toLocaleDateString('ru')}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="bg-craft-card border border-craft-border rounded-xl p-6">
+              <h3 className="text-lg font-bold text-craft-gold mb-4">👥👥 Рефералы 2-го уровня ({user.referrals_l2?.length || 0})</h3>
+              {!user.referrals_l2 || user.referrals_l2.length === 0 ? (
+                <div className="text-craft-muted text-sm text-center py-4">Нет рефералов 2-го уровня</div>
+              ) : (
+                <div className="space-y-1">
+                  {user.referrals_l2.map((ref: any) => (
+                    <div key={ref.id} className="flex items-center justify-between py-3 px-4 border-b border-craft-border/30 hover:bg-craft-dark/30 rounded-lg transition">
+                      <div>
+                        <button onClick={() => router.push(`/dashboard/users/${ref.id}`)} className="text-craft-amber hover:underline text-sm">
+                          {ref.first_name} (@{ref.username || '—'})
+                        </button>
+                        <span className="text-xs text-craft-muted ml-2">через {ref.via}</span>
+                      </div>
+                      <span className="text-xs text-craft-muted">{new Date(ref.created_at).toLocaleDateString('ru')}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
