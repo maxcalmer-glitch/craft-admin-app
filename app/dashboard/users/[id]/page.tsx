@@ -50,7 +50,11 @@ interface BotMessage {
   created_at: string
 }
 
-type TabKey = 'info' | 'ai-chat' | 'bot-chat' | 'referrals'
+interface BalanceEntry {
+  id: number; amount: number; operation: string; description: string; balance_after: number; created_at: string
+}
+
+type TabKey = 'info' | 'ai-chat' | 'bot-chat' | 'referrals' | 'balance'
 
 export default function UserDetailPage() {
   const { id } = useParams()
@@ -72,6 +76,8 @@ export default function UserDetailPage() {
   const [botMessages, setBotMessages] = useState<BotMessage[]>([])
   const [botLoading, setBotLoading] = useState(false)
   const [botReply, setBotReply] = useState('')
+  const [balanceHistory, setBalanceHistory] = useState<BalanceEntry[]>([])
+  const [balanceLoading, setBalanceLoading] = useState(false)
   const chatEndRef = useRef<HTMLDivElement>(null)
   const aiEndRef = useRef<HTMLDivElement>(null)
   const botEndRef = useRef<HTMLDivElement>(null)
@@ -112,6 +118,15 @@ export default function UserDetailPage() {
       .finally(() => setAiLoading(false))
   }
 
+  const fetchBalanceHistory = () => {
+    setBalanceLoading(true)
+    fetch(`${API_URL}/api/admin/user/${id}/balance-history?secret=${SECRET}`)
+      .then(r => r.json())
+      .then(data => setBalanceHistory(data.history || []))
+      .catch(() => {})
+      .finally(() => setBalanceLoading(false))
+  }
+
   const fetchBotMessages = () => {
     if (!user?.telegram_id) return
     setBotLoading(true)
@@ -138,6 +153,7 @@ export default function UserDetailPage() {
   useEffect(() => {
     if (activeTab === 'ai-chat' && user?.telegram_id) fetchAiHistory()
     if (activeTab === 'bot-chat' && user?.telegram_id) fetchBotMessages()
+    if (activeTab === 'balance') fetchBalanceHistory()
   }, [activeTab, user?.telegram_id])
 
   const sendMessage = async () => {
@@ -224,6 +240,7 @@ export default function UserDetailPage() {
     { key: 'ai-chat', label: '🧠 AI чат' },
     { key: 'bot-chat', label: '💬 Сообщения боту' },
     { key: 'referrals', label: `🔗 Рефералы (${user.referrals?.length || 0})` },
+    { key: 'balance', label: '💰 Баланс' },
   ]
 
   return (
@@ -463,6 +480,32 @@ export default function UserDetailPage() {
                       {ref.first_name} (@{ref.username || '—'})
                     </button>
                     <span className="text-xs text-craft-muted">{new Date(ref.created_at).toLocaleDateString('ru')}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'balance' && (
+          <div className="bg-craft-card border border-craft-border rounded-xl p-6">
+            <h3 className="text-lg font-bold text-craft-gold mb-4">💰 История баланса</h3>
+            {balanceLoading ? (
+              <div className="text-craft-muted text-sm text-center py-8">Загрузка...</div>
+            ) : balanceHistory.length === 0 ? (
+              <div className="text-craft-muted text-sm text-center py-8">Нет операций</div>
+            ) : (
+              <div className="space-y-1 max-h-[500px] overflow-y-auto">
+                <div className="grid grid-cols-5 gap-2 text-xs font-bold text-craft-muted px-3 py-2 border-b border-craft-border">
+                  <span>Дата</span><span>Операция</span><span>Описание</span><span className="text-right">Сумма</span><span className="text-right">Баланс</span>
+                </div>
+                {balanceHistory.map(b => (
+                  <div key={b.id} className="grid grid-cols-5 gap-2 text-sm px-3 py-2 border-b border-craft-border/20 hover:bg-craft-dark/30 rounded">
+                    <span className="text-craft-muted text-xs">{new Date(b.created_at).toLocaleString('ru', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span>
+                    <span className="text-craft-amber text-xs">{b.operation}</span>
+                    <span className="text-craft-muted text-xs truncate">{b.description || '—'}</span>
+                    <span className={`text-right text-xs font-bold ${b.amount > 0 ? 'text-green-400' : 'text-red-400'}`}>{b.amount > 0 ? '+' : ''}{b.amount}</span>
+                    <span className="text-right text-xs text-craft-gold">{b.balance_after}</span>
                   </div>
                 ))}
               </div>
