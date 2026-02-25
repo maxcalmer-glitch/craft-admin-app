@@ -26,6 +26,7 @@ interface UserDetail {
   ai_requests_count: number
   referrer: { id: number; first_name: string; username: string } | null
   referrals: { id: number; first_name: string; username: string; created_at: string }[]
+  referrals_l2: { id: number; first_name: string; username: string; created_at: string; via: string }[]
 }
 
 interface ChatMessage {
