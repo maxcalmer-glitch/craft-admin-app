@@ -8,11 +8,12 @@ let supabaseInstance: SupabaseClient | null = null
 
 export function getDb(): SupabaseClient {
   if (!supabaseInstance) {
-    const key = supabaseServiceKey || supabaseAnonKey
-    if (!supabaseUrl || !key) {
-      throw new Error('Supabase credentials not configured. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in Vercel env vars.')
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL || supabaseUrl
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseServiceKey || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || supabaseAnonKey
+    if (!url || !key) {
+      throw new Error('Supabase credentials not configured.')
     }
-    supabaseInstance = createClient(supabaseUrl, key, {
+    supabaseInstance = createClient(url, key, {
       auth: { autoRefreshToken: false, persistSession: false }
     })
   }
