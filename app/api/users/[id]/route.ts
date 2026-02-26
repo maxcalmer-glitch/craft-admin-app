@@ -21,7 +21,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     }
 
     // Get L1 referrals
-    const { data: referralLinks } = await db.from('referrals').select('referred_id').eq('referrer_id', user.id)
+    const { data: referralLinks } = await db.from('referrals').select('referred_id').eq('referrer_id', user.id).eq('level', 1)
     let referrals: any[] = []
     let referrals_l2: any[] = []
     if (referralLinks && referralLinks.length > 0) {
@@ -29,14 +29,14 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       const { data } = await db.from('users').select('id, first_name, username, created_at').in('id', ids)
       referrals = data || []
 
-      // Get L2 referrals (referrals of my referrals)
-      const { data: l2Links } = await db.from('referrals').select('referred_id, referrer_id').in('referrer_id', ids)
+      // Get L2 referrals (direct from referrals table level=2)
+      const { data: l2Links } = await db.from('referrals').select('referred_id').eq('referrer_id', user.id).eq('level', 2)
       if (l2Links && l2Links.length > 0) {
         const l2ids = l2Links.map(r => r.referred_id)
         const { data: l2users } = await db.from('users').select('id, first_name, username, created_at, referrer_id').in('id', l2ids)
         referrals_l2 = (l2users || []).map(u => {
           const parent = referrals.find(r => r.id === u.referrer_id)
-          return { ...u, via: parent?.first_name || '—' }
+          return { ...u, via: parent?.first_name || parent?.username || '—' }
         })
       }
     }
