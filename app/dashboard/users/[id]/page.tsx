@@ -109,7 +109,7 @@ export default function UserDetailPage() {
   const fetchAiHistory = () => {
     if (!user?.telegram_id) return
     setAiLoading(true)
-    fetch(`${API_URL}/api/admin/ai-history/${user.telegram_id}?secret=${SECRET}`)
+    fetch(`${API_URL}/api/admin/ai-history/${user.telegram_id}`, { headers: { 'X-Admin-Secret': SECRET } })
       .then(r => r.json())
       .then(data => {
         setAiMessages(Array.isArray(data) ? data : data.messages || [])
@@ -121,7 +121,7 @@ export default function UserDetailPage() {
 
   const fetchBalanceHistory = () => {
     setBalanceLoading(true)
-    fetch(`${API_URL}/api/admin/user/${id}/balance-history?secret=${SECRET}`)
+    fetch(`${API_URL}/api/admin/user/${id}/balance-history`, { headers: { 'X-Admin-Secret': SECRET } })
       .then(r => r.json())
       .then(data => setBalanceHistory(data.history || []))
       .catch(() => {})
@@ -131,7 +131,7 @@ export default function UserDetailPage() {
   const fetchBotMessages = () => {
     if (!user?.telegram_id) return
     setBotLoading(true)
-    fetch(`${API_URL}/api/admin/user-chat/messages/${user.telegram_id}?secret=${SECRET}`)
+    fetch(`${API_URL}/api/admin/user-chat/messages/${user.telegram_id}`, { headers: { 'X-Admin-Secret': SECRET } })
       .then(r => r.json())
       .then(data => {
         setBotMessages(Array.isArray(data) ? data : data.messages || [])
@@ -176,9 +176,9 @@ export default function UserDetailPage() {
     if (!botReply.trim() || !user?.telegram_id) return
     setSending(true)
     try {
-      await fetch(`${API_URL}/api/admin/user-chat/send?secret=${SECRET}`, {
+      await fetch(`${API_URL}/api/admin/user-chat/send`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': SECRET },
         body: JSON.stringify({ user_id: Number(user.telegram_id), text: botReply })
       })
       setBotReply('')

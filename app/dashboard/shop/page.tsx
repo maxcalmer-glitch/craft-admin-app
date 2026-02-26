@@ -32,7 +32,7 @@ export default function ShopPage() {
   const [saving, setSaving] = useState(false)
 
   const fetchItems = () => {
-    fetch(`${API_URL}/api/admin/shop/items?secret=${SECRET}`)
+    fetch(`${API_URL}/api/admin/shop/items`, { headers: { 'X-Admin-Secret': SECRET } })
       .then(r => r.json())
       .then(data => setItems(Array.isArray(data) ? data : data.items || []))
       .catch(console.error)
@@ -50,9 +50,9 @@ export default function ShopPage() {
   const handleSave = async () => {
     setSaving(true)
     try {
-      const url = modal === 'add' ? `${API_URL}/api/admin/shop/add-item?secret=${SECRET}` : `${API_URL}/api/admin/shop/update-item?secret=${SECRET}`
+      const url = modal === 'add' ? `${API_URL}/api/admin/shop/add-item ` : `${API_URL}/api/admin/shop/update-item `
       const body = modal === 'edit' ? { id: editId, ...form } : form
-      await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': SECRET }, body: JSON.stringify(body) })
       setModal(null); fetchItems()
     } catch (e) { console.error(e) }
     setSaving(false)
@@ -60,7 +60,7 @@ export default function ShopPage() {
 
   const handleDelete = async (id: number) => {
     if (!confirm('Удалить этот товар?')) return
-    await fetch(`${API_URL}/api/admin/shop/delete-item?secret=${SECRET}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) })
+    await fetch(`${API_URL}/api/admin/shop/delete-item`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': SECRET }, body: JSON.stringify({ id }) })
     fetchItems()
   }
 
