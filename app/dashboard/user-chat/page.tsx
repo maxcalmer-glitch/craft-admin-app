@@ -35,7 +35,7 @@ export default function UserChatPage() {
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
   const fetchUsers = () => {
-    fetch(`${API_URL}/api/admin/user-chat/users?secret=${SECRET}`)
+    fetch(`${API_URL}/api/admin/user-chat/users`, { headers: { 'X-Admin-Secret': SECRET } })
       .then(r => r.json())
       .then(data => setUsers(Array.isArray(data) ? data : data.users || []))
       .catch(console.error)
@@ -45,7 +45,7 @@ export default function UserChatPage() {
   useEffect(() => { fetchUsers() }, [])
 
   const fetchMessages = (userId: number) => {
-    fetch(`${API_URL}/api/admin/user-chat/messages/${userId}?secret=${SECRET}`)
+    fetch(`${API_URL}/api/admin/user-chat/messages/${userId}`, { headers: { 'X-Admin-Secret': SECRET } })
       .then(r => r.json())
       .then(data => {
         setMessages(Array.isArray(data) ? data : data.messages || [])
@@ -71,9 +71,9 @@ export default function UserChatPage() {
     if (!reply.trim() || !selectedUser) return
     setSending(true)
     try {
-      await fetch(`${API_URL}/api/admin/user-chat/send?secret=${SECRET}`, {
+      await fetch(`${API_URL}/api/admin/user-chat/send`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': SECRET },
         body: JSON.stringify({ user_id: selectedUser.user_id, text: reply })
       })
       setReply('')

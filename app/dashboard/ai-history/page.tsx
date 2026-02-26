@@ -32,7 +32,7 @@ export default function AIHistoryPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    fetch(`${API_URL}/api/admin/ai-history?secret=${SECRET}`)
+    fetch(`${API_URL}/api/admin/ai-history`, { headers: { 'X-Admin-Secret': SECRET } })
       .then(r => r.json())
       .then(data => {
         const list = Array.isArray(data) ? data : data.users || []
@@ -55,7 +55,7 @@ export default function AIHistoryPage() {
   const selectUser = (user: UserSummary) => {
     setSelectedUser(user)
     setLoadingMessages(true)
-    fetch(`${API_URL}/api/admin/ai-history/${user.user_id}?secret=${SECRET}`)
+    fetch(`${API_URL}/api/admin/ai-history/${user.user_id}`, { headers: { 'X-Admin-Secret': SECRET } })
       .then(r => r.json())
       .then(data => {
         setMessages(Array.isArray(data) ? data : data.messages || [])
